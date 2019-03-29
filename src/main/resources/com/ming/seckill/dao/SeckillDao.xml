@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ming.seckill.dao.SeckillDao">
+    <sql id="table">seckill</sql>
+    <sql id="selectFields">seckill_id, name, number, start_time, end_time, create_time
+    </sql>
+    <select id="selectAll" resultType="com.ming.seckill.model.Seckill">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        ORDER BY create_time DESC
+        LIMIT #{offset},#{limit}
+    </select>
+
+    <select id="selectById" resultType="com.ming.seckill.model.Seckill">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        <include refid="table"/>
+        WHERE
+        seckill_id = #{seckillId}
+    </select>
+
+    <update id="reduceNumber">
+        UPDATE
+        <include refid="table"/>
+        SET
+        number = number - 1
+        WHERE
+        seckill_id = #{seckillId}
+        AND start_time <![CDATA[<=]]> #{killTime}
+        AND end_time <![CDATA[>=]]> #{killTime}
+        AND number > 0;
+    </update>
+
+</mapper>

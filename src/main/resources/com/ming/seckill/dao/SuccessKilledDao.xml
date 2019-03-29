@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ming.seckill.dao.SuccessKilledDao">
+    <sql id="table">success_killed</sql>
+    <sql id="insertFields">seckill_id, user_phone</sql>
+    <!-- 使用ignore是为了在有人要重复秒杀（即主键冲突）时不报错，操作不成功返回0就行了 -->
+    <insert id="insertSuccessKilled">
+        INSERT ignore INTO
+        <include refid="table"/>
+        (seckill_id, user_phone, state)
+        VALUES
+        (#{seckillId},#{userPhone},0)
+    </insert>
+
+    <select id="queryByIdWithSeckill" resultType="com.ming.seckill.model.SuccessKilled">
+        <!--根据id查询SuccessKilled并携带Seckill实体-->
+        <!--不写链接可以分两条SQL，
+        先查出success_killed的seckill_id,再根据seckill_id查询seckill
+        目的：想要在一个实体内完成查询，SuccessKilled有成员变量seckill
+        如何告诉mybatis把结果映射到SuccessKilled同时映射seckill属性
+        独有特点：mybatis可以自由控制SQL
+        -->
+        SELECT
+        sk.seckill_id,
+        sk.user_phone,
+        sk.create_time,
+        sk.state,
+        s.seckill_id "seckill.seckill_id",
+        s.name "seckill.name",
+        s.number "seckill.number",
+        s.start_time "seckill.start_time",
+        s.end_time "seckill.end_time",
+        s.create_time "seckill.create_time"
+        FROM success_killed sk
+        INNER JOIN seckill s ON sk.seckill_id = s.seckill_id
+        WHERE sk.seckill_id = #{seckillId} AND sk.user_phone = #{userPhone};
+    </select>
+
+</mapper>
